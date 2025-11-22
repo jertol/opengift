@@ -1,6 +1,6 @@
 # OpenGift
 
-An open-source and lightweight gift registry application where family and friends can browse and claim gifts with integrated payment options.
+An open-source and lightweight gift registry application where friends and family can browse and claim gifts.
 
 ## Features
 
@@ -15,7 +15,7 @@ An open-source and lightweight gift registry application where family and friend
 
 1. **Clone and install dependencies:**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/jertol/opengift.git
    cd opengift
    npm install
    ```
@@ -26,13 +26,38 @@ An open-source and lightweight gift registry application where family and friend
    cp .env.local.example .env.local
    ```
 
-3. **Edit `config.js` with your information:**
+3. **Set up Google Sheets integration:**
+   - **Create your Google Sheet:**
+     1. Create a new Google Sheets document
+     2. In the first row (row 1), paste these column headers:
+        ```
+        Name	Description	Price	Link	Image	IsReserved	ReservedBy	ReservedDate	ReservedEmail	ReservedMessage	IsCustomPrice	ContributionCount	IsGifted	GiftedBy	GiftedMessage	GiftedDate
+        ```
+     3. **Find your Google Sheets ID:** The spreadsheet ID is in the URL. For example, if your URL is:
+        ```
+        https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+        ```
+        The ID is the part between `/d/` and `/edit`: `1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms`
+   
+   - **Set up Google Sheets API:**
+     1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+     2. Create a new project (or select existing)
+     3. Enable "Google Sheets API"
+     4. Create credentials → Service Account
+     5. Download the service account JSON key
+     6. Share your Google Sheet with the service account email (found in the JSON file, look for `client_email`)
+   
+   - **Save the service account JSON:**
+     - For local development: Save the downloaded JSON file as `service_account.json` in the project root
+     - For production: You'll add this as an environment variable (see Deployment section)
+
+4. **Edit `config.js` with your information:**
    - Change `pageTitle` to your desired title
    - Add your email addresses
-   - Add your Google Sheets ID
+   - Add your Google Sheets ID (the ID you found in step 3)
    - Add your Revolut payment link
 
-4. **Set up Resend for email notifications:**
+5. **Set up Resend for email notifications:**
    - Sign up at [resend.com](https://resend.com)
    - Generate an API key in the dashboard
    - Add to `.env.local`:
@@ -47,18 +72,6 @@ An open-source and lightweight gift registry application where family and friend
         ```env
         RESEND_FROM_EMAIL=noreply@yourdomain.com
         ```
-
-5. **Set up Google Sheets integration:**
-   - Create a Google Sheets document with these column headers in the first row:
-     | Name | Description | Price | Link | Image | IsReserved | ReservedBy | ReservedDate | ReservedEmail | ReservedMessage | IsCustomPrice | ContributionCount | IsGifted | GiftedBy | GiftedMessage | GiftedDate |
-   - Set up Google Sheets API:
-     1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-     2. Create a new project (or select existing)
-     3. Enable "Google Sheets API"
-     4. Create credentials → Service Account
-     5. Download the service account JSON key
-     6. Share your Google Sheet with the service account email (found in the JSON)
-   - Save the service account JSON as `service_account.json` in the project root
 
 6. **Run the development server:**
    ```bash
@@ -117,9 +130,7 @@ Your Google Sheets should have these column headers in the first row (A1:P1):
 ### Optional:
 - `RESEND_FROM_EMAIL` - Custom sender email (requires domain verification in Resend)
 - `NEXT_PUBLIC_SITE_URL` - Your site URL for metadata (defaults to `http://localhost:3000`)
-- `REVOLUT_LINK` - Override the Revolut link from config.js
-- `GOOGLE_SERVICE_ACCOUNT_BASE64` - Base64 encoded service account JSON (for production deployment)
-- `GOOGLE_SERVICE_ACCOUNT_JSON` - Direct JSON string (alternative to base64, not recommended for production)
+- `GOOGLE_SERVICE_ACCOUNT_JSON` - Service account JSON as a string (for production deployment)
 
 ## Language Configuration
 
@@ -138,12 +149,10 @@ All UI text, emails, and notifications will automatically use the selected langu
 The app is ready for deployment to platforms like Vercel, Netlify, or similar. Make sure to:
 
 1. Set all required environment variables in your deployment platform
-2. Upload your Google service account JSON as a base64 encoded environment variable:
-   ```bash
-   # Convert service_account.json to base64
-   base64 -i service_account.json | pbcopy
-   # Then paste as GOOGLE_SERVICE_ACCOUNT_BASE64 in your deployment platform
-   ```
+2. Add your Google service account JSON as an environment variable:
+   - Copy the entire contents of your `service_account.json` file
+   - In your deployment platform, create a new environment variable named `GOOGLE_SERVICE_ACCOUNT_JSON`
+   - Paste the JSON content as the value (keep it as a single line or properly escaped JSON string)
 
 ## Troubleshooting
 

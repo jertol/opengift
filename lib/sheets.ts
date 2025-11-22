@@ -6,10 +6,6 @@ async function getServiceAccount() {
   if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
     // Production: use JSON string from environment variable
     return JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-  } else if (process.env.GOOGLE_SERVICE_ACCOUNT_BASE64) {
-    // Production: decode base64 encoded service account
-    const serviceAccountJson = Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
-    return JSON.parse(serviceAccountJson);
   } else {
     // Local development: try to use service_account.json file
     try {
